@@ -22,7 +22,7 @@ deal_all_map::deal_all_map(/* args */) : private_node_("~")
   // 订阅里程计消息
   if(is_use_sim)  // 仿真情况下使用
   {
-    localizationSub = node_handle_.subscribe("/carto_odom",1,&deal_all_map::localizationCallback,this);
+    localizationSub = node_handle_.subscribe("/odom",1,&deal_all_map::localizationCallback,this);
     // 订阅point cloud2点云消息用来发布局部地图
     pointCloud2Sub = node_handle_.subscribe("/cloud_map",10,&deal_all_map::pointCloud2Callback,this);
     // 订阅鼠标点击目标点
@@ -30,7 +30,7 @@ deal_all_map::deal_all_map(/* args */) : private_node_("~")
   }
   else
   {
-    localizationSub = node_handle_.subscribe("/carto_odom",1,&deal_all_map::localizationCallback,this);
+    localizationSub = node_handle_.subscribe("/odom",1,&deal_all_map::localizationCallback,this);
     // 订阅point cloud2点云消息用来发布局部地图
     pointCloud2Sub = node_handle_.subscribe("/cloud_map",10,&deal_all_map::pointCloud2Callback,this);
 

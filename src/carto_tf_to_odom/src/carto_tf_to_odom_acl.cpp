@@ -7,18 +7,18 @@
 
 int main(int argc, char** argv)
 {
-  ros::init(argc, argv, "carto_odom_publisher");
+  ros::init(argc, argv, "odom_publisher");
   ros::NodeHandle nh;
   ros::NodeHandle pnh("~");
 
-  // 参数：默认读 odom->base_footprint，发布 /carto_odom
+  // 参数：默认读 odom->base_footprint，发布 /odom
   std::string odom_frame, base_frame, topic_odom;
   double pub_rate;
 
   pnh.param<std::string>("odom_frame",  odom_frame,  std::string("odom"));
   // 实际中雷达的坐标系名称
   pnh.param<std::string>("base_frame",  base_frame,  std::string("livox_frame"));
-  pnh.param<std::string>("topic_odom",  topic_odom,  std::string("/carto_odom"));
+  pnh.param<std::string>("topic_odom",  topic_odom,  std::string("/odom"));
   pnh.param<double>("pub_rate", pub_rate, 30.0);
 
   ros::Publisher odom_pub = nh.advertise<nav_msgs::Odometry>(topic_odom, 10);
@@ -36,7 +36,7 @@ int main(int argc, char** argv)
     }
     catch (const tf2::TransformException& ex)
     {
-      ROS_WARN_THROTTLE(1.0, "[carto_odom_publisher] TF lookup failed: %s", ex.what());
+      ROS_WARN_THROTTLE(1.0, "[odom_publisher] TF lookup failed: %s", ex.what());
       ros::spinOnce();
       rate.sleep();
       continue;

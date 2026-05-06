@@ -38,7 +38,7 @@ void global_map_deal::init(ros::NodeHandle &nh)
   // 订阅全局地图消息
   map_subscriber = nh.subscribe("/map",1,&global_map_deal::MapCallback,this);
   // 订阅里程计消息
-  localizationSub = nh.subscribe("/carto_odom",1,&global_map_deal::localizationCallback,this);
+  localizationSub = nh.subscribe("/odom",1,&global_map_deal::localizationCallback,this);
 
   // 发布全局地图消息
   global_inflate_map_publiser = nh.advertise<nav_msgs::OccupancyGrid>("/global_map_inflate",10,true);

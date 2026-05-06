@@ -39,7 +39,7 @@ Differential_DWAPlanner::Differential_DWAPlanner(void)
 
   local_goal_sub = nh.subscribe("/local_goal", 1, &Differential_DWAPlanner::local_goal_callback, this);
   local_map_sub = nh.subscribe("/local_map_inflate", 1, &Differential_DWAPlanner::local_map_callback, this);
-  odom_sub = nh.subscribe("/carto_odom", 1, &Differential_DWAPlanner::odom_callback, this);
+  odom_sub = nh.subscribe("/odom", 1, &Differential_DWAPlanner::odom_callback, this);
   target_velocity_sub = nh.subscribe("/velocity_control", 1, &Differential_DWAPlanner::target_velocity_callback, this);
     // 订阅路径
   pathSub = nh.subscribe("/opt_path",10,&Differential_DWAPlanner::pathCallback,this);

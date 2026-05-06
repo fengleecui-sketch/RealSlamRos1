@@ -211,7 +211,7 @@ local_goal_sub = nh.subscribe("/local_goal", 1, &DWAPlanner::local_goal_callback
 ```
 5. 需要里程计数据，因为算法是需要根据当前的运动状态进行采样的，即根据反馈速度采样
 ```c++
-  odom_sub = nh.subscribe("/carto_odom", 1, &DWAPlanner::odom_callback, this);
+  odom_sub = nh.subscribe("/odom", 1, &DWAPlanner::odom_callback, this);
 ```
 **6.这点网上很多开源算法不会提到，在最开始的阶段没有速度反馈，需要一个激励速度去作为临时采样参照，由此开始车才能动起来，当然这里是临时使用全向移动模型做一个实验，目前这样做是不合理的**
 ```c++

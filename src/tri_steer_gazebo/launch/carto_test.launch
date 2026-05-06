@@ -45,7 +45,7 @@
  
   <node pkg="tf2_ros" type="static_transform_publisher" name="link_broadcaster" args="0 0 0 0 0 0 map odom" />
 
-    <!-- 发布 odom->base_footprint（订阅 carto_odom 并转发 /odom + TF） -->
+    <!-- 发布 odom->base_footprint（订阅 odom 并转发 /odom + TF） -->
   <node pkg="tri_steer_gazebo"
       type="odom_tf_basefootprint"
       name="odom_tf_basefootprint"

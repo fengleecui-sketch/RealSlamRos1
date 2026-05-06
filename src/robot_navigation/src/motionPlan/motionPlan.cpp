@@ -77,6 +77,8 @@ void motionPlan::motionInit(void)
   private_node.param("fifth_point_x",fifth_point_x,0.1);
   private_node.param("fifth_point_y",fifth_point_y,0.1);
 
+
+  tfListener = new tf2_ros::TransformListener(tfBuffer);
   // 重新加载巡航点数目
   cruise_points.resize(cruise_num);
   // 当进入巡航模式的时候巡航
@@ -152,10 +154,10 @@ void motionPlan::motionInit(void)
   // 仿真和实际的定位消息是不一样的
   if (is_sim == false)
   {
-    // 订阅定位消息 carto_odom
+    // 订阅定位消息 odom
     //localizationSub = motPlan.subscribe("/odom_carto", 10, &motionPlan::localizationCallback, this);
     //订阅mid360雷达的位置消息
-    localizationSub = motPlan.subscribe("/carto_odom", 10, &motionPlan::localizationCallback_mid360, this);
+    localizationSub = motPlan.subscribe("/odom", 10, &motionPlan::localizationCallback_mid360, this);
   
   }
   else
@@ -193,7 +195,7 @@ void motionPlan::motionInit(void)
   // 获取frame_id名称
   if (!private_node.getParam("motion_plan/frame_id", frame_id_name))
   {
-    frame_id_name = "odom";
+    frame_id_name = "map";
   }
 }
 
@@ -603,8 +605,8 @@ void motionPlan::localizationCallback_mid360(const nav_msgs::OdometryConstPtr& m
 
   // 4) 起点赋值
   // ---------------------------
-  startPoint[0] = x;
-  startPoint[1] = y;
+  // startPoint[0] = x;
+  // startPoint[1] = y;
 
   static int i = 0;
   if(fabs((startPoint-endPoint).norm()) <= stop_margin)
@@ -800,9 +802,28 @@ void motionPlan::pathPlanning(Eigen::Vector2d startMapPoint, Eigen::Vector2d goa
   //   cout<<"Not have local map!"<<endl;
   //   return;
   // }
-  if(has_arrived_end){
-    cout<<"Arrived the end!"<<endl;
-    return;
+
+// ==================== 【关键修改：获取真实全局起点】 ====================
+  // 在每次规划前，强制通过 TF 树查询机器人在 map 下的绝对坐标
+  // 这包含了 Cartographer 的重定位/闭环纠偏 (map -> odom) 加上底盘平滑运动 (odom -> base_link)
+  geometry_msgs::TransformStamped transformStamped;
+  try {
+      // 0.1秒超时，查询 map 到 base_link (或 base_footprint，取决于你的模型) 的当前变换
+      transformStamped = tfBuffer.lookupTransform("map", "base_link", ros::Time(0), ros::Duration(0.1));
+      
+      // 用真实的全局坐标覆盖传入的 startMapPoint
+      startMapPoint[0] = transformStamped.transform.translation.x;
+      startMapPoint[1] = transformStamped.transform.translation.y;
+      
+      // 同步更新类内部的起点记录 (用于判断是否到达终点等逻辑)
+      startPoint[0] = startMapPoint[0];
+      startPoint[1] = startMapPoint[1];
+      
+      // 可以解除注释看看获取到的坐标对不对
+      // ROS_INFO("True Start Point from TF: [%.2f, %.2f]", startPoint[0], startPoint[1]);
+  } catch (tf2::TransformException &ex) {
+      ROS_WARN("等待全局坐标 TF 同步 (map -> base_link)... %s", ex.what());
+      return; // 如果还没拿到 map 坐标（比如刚启动），先退出，等待下一帧循环
   }
 
   // 使用普通astar进行规划

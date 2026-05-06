@@ -10,7 +10,7 @@
 
 
     <!-- 保持与你的系统一致：局部规划输出 remap 到 /cmd_vel_auto -->
-  <!-- <remap from="/truth_pose_odom" to="/carto_odom"/> -->
+  <!-- <remap from="/truth_pose_odom" to="/odom"/> -->
 
 
     <!-- 如果你系统里 DWA 用的就是这些名字，就不用改 -->

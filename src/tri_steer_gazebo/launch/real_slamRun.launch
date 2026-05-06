@@ -27,10 +27,10 @@
       map->odom 应由 AMCL 或 Cartographer localization 发布 -->
 
   <!-- ✅ 你自己的里程计/TF桥接节点
-       例如：订阅 carto_odom 或底盘里程计，发布 /odom + TF(odom->base_footprint/base_link) -->
+       例如：订阅 odom 或底盘里程计，发布 /odom + TF(odom->base_footprint/base_link) -->
   <node pkg="tf2_ros" type="static_transform_publisher" name="link_broadcaster" args="0 0 0 0 0 0 map odom" />
 
-    <!-- 发布 odom->base_footprint（订阅 carto_odom 并转发 /odom + TF） -->
+    <!-- 发布 odom->base_footprint（订阅 odom 并转发 /odom + TF） -->
   <node pkg="tri_steer_gazebo"
       type="odom_tf_basefootprint"
       name="odom_tf_basefootprint"

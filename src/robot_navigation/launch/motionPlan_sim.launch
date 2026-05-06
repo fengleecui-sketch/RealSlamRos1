@@ -97,6 +97,28 @@
     <!-- frame_name id名称 -->
     <param name="motion_plan/frame_id" value="map" type="string" />
   </node>
-  
-</launch>
+   <!--发布里程计信息 - 改进版本（已修复自动运动问题）  -->
+   <node pkg="robot_navigation" type="tri_steer_odom.py" name="tri_steer_odom" output="screen">
+    <!-- 运动学半径：中心到舵轮转轴距离（从你的xacro精确计算） -->
+    <param name="R" value="0.35334" />
 
+    <!-- 轮子半径 -->
+    <param name="wheel_radius" value="0.05" />
+
+    <!-- 三个舵轮安装角度 -->
+    <param name="wheel1_deg" value="0.0" />
+    <param name="wheel2_deg" value="120.0" />
+    <param name="wheel3_deg" value="240.0" />
+
+    <!-- 【关键】关节名称必须 100% 匹配 /joint_states 中的实际名称 -->
+    <!-- ⚠️  验证命令: rostopic echo /joint_states | head -30 -->
+    <param name="steer_joint_1" value="joint11" />
+    <param name="steer_joint_2" value="joint21" />
+    <param name="steer_joint_3" value="joint31" />
+
+    <param name="drive_joint_1" value="joint12" />
+    <param name="drive_joint_2" value="joint22" />
+    <param name="drive_joint_3" value="joint32" />
+   </node>
+
+</launch>

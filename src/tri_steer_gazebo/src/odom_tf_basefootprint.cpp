@@ -11,7 +11,7 @@ class OdomToBaseFootprint
 public:
   OdomToBaseFootprint()
   {
-    sub_ = nh_.subscribe("/carto_odom", 10,
+    sub_ = nh_.subscribe("/odom", 10,
                          &OdomToBaseFootprint::odomCallback, this);
   }
 

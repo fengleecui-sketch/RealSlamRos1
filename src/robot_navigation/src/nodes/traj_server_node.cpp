@@ -206,7 +206,7 @@ int main(int argc, char **argv)
 
   ros::Subscriber replan_sub = node.subscribe("planning/replan", 10, replanCallback);
 
-  ros::Subscriber odom_sub = node.subscribe("/carto_odom", 50, odomCallbck);
+  ros::Subscriber odom_sub = node.subscribe("/odom", 50, odomCallbck);
 
   state_pub = node.advertise<visualization_msgs::Marker>("planning/state", 10); // 可视化状态, visualization_msgs::Marker::ARROW
   traj_pub = node.advertise<visualization_msgs::Marker>("planning/traj", 10);   // 可视化轨迹, visualization_msgs::Marker::SPHERE_LIST

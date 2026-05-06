@@ -198,7 +198,10 @@ class TriSteerDriveNode:
             wheels = [0.0, 0.0, 0.0]
 
             for i in range(3):
-                steers[i], wheels[i] = self.wheel_cmd(i, self.thetas[i], dt)
+                global_steer, wheels[i] = self.wheel_cmd(i, self.thetas[i], dt)
+                
+                # 2. 【核心修复】：减去该轮子的安装偏角，换算成 URDF 关节的局部角度
+                steers[i] = global_steer
 
             self.publish_cmds(steers, wheels)
             rate.sleep()

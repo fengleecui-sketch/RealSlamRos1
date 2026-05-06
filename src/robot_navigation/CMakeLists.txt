@@ -154,3 +154,9 @@ target_link_libraries(traj_server
   ${THIRD_PART_LIBRARIES}
   ${OpenCV_LIBS}
   )
+
+
+  catkin_install_python(PROGRAMS
+  scripts/tri_steer_odom.py
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)

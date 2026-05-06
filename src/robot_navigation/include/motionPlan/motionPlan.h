@@ -17,11 +17,14 @@ using namespace chrono;
 
 #include <math.h>
 #include <ros/ros.h>
+#include <tf2_ros/buffer.h>
 #include <ros/console.h>
+#include <tf2_ros/transform_listener.h>
 #include <std_msgs/Empty.h>
 #include <nav_msgs/Path.h>
 #include <nav_msgs/OccupancyGrid.h>
 #include <geometry_msgs/PoseStamped.h>
+#include <geometry_msgs/TransformStamped.h>
 #include <geometry_msgs/PoseWithCovarianceStamped.h>
 #include <visualization_msgs/MarkerArray.h>
 #include <visualization_msgs/Marker.h>
@@ -67,6 +70,8 @@ private:
   ros::NodeHandle motPlan;       //运动规划节点
   // 如果没有私有节点，launch文件中的参数加载不进来，目前还不知道为什么，但是一定要像这样使用
   ros::NodeHandle private_node;  // ros中的私有句柄
+  tf2_ros::Buffer tfBuffer;
+  tf2_ros::TransformListener* tfListener;
 
   // 话题发布
   ros::Publisher navmapPub;      //导航地图

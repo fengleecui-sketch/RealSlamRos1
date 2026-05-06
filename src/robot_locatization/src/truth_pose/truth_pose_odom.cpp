@@ -13,9 +13,9 @@
 truth_pose_odom::truth_pose_odom(/* args */)
 {
   // 订阅真值消息
-  truth_pose_subscriber = truth_pose_node.subscribe("carto_odom",10,&truth_pose_odom::modelcarto_odomCallback,this);
+  truth_pose_subscriber = truth_pose_node.subscribe("odom",10,&truth_pose_odom::modelodomCallback,this);
   // 消息发布
-  carto_odomDataPub = truth_pose_node.advertise<robot_communication::localizationInfoBroadcast>("truth_pose_odom",50);
+  odomDataPub = truth_pose_node.advertise<robot_communication::localizationInfoBroadcast>("truth_pose_odom",50);
 
 
   ros::Rate loop_rate(50);
@@ -36,7 +36,7 @@ truth_pose_odom::~truth_pose_odom()
 {
 }
 
-void truth_pose_odom::modelcarto_odomCallback(const nav_msgs::Odometry::ConstPtr& gazebomsg)
+void truth_pose_odom::modelodomCallback(const nav_msgs::Odometry::ConstPtr& gazebomsg)
 {
   // gazebo发布的世界真值里程计消息是把当前模型当做一个质点的理想状态，发布的速度加速度均是世界坐标系下的速度和
   // 加速度
@@ -65,6 +65,6 @@ void truth_pose_odom::modelcarto_odomCallback(const nav_msgs::Odometry::ConstPtr
   odomDataMsg.xAccel = 0;
   odomDataMsg.yAccel = 0;
   // 发布消息
-  carto_odomDataPub.publish(odomDataMsg);
+  odomDataPub.publish(odomDataMsg);
 }
 
