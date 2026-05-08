@@ -26,7 +26,7 @@ class TriSteerDriveNode:
         self.cmd_topic = rospy.get_param("~cmd_topic", "/cmd_vel")
 
         # Robot geometry
-        self.R = float(rospy.get_param("~R", 0.2))                  # center -> wheel module distance
+        self.R = float(rospy.get_param("~R", 0.35335))                  # center -> wheel module distance
         self.wheel_radius = float(rospy.get_param("~wheel_radius", 0.05))
 
         # Wheel mount angles in degrees (often provided as CW: 0/120/240)
@@ -199,8 +199,6 @@ class TriSteerDriveNode:
 
             for i in range(3):
                 global_steer, wheels[i] = self.wheel_cmd(i, self.thetas[i], dt)
-                
-                # 2. 【核心修复】：减去该轮子的安装偏角，换算成 URDF 关节的局部角度
                 steers[i] = global_steer
 
             self.publish_cmds(steers, wheels)

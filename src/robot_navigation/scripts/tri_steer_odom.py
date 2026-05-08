@@ -47,6 +47,11 @@ class TriSteerOdomNode:
         self.vx_last = 0.0
         self.vy_last = 0.0
         self.wz_last = 0.0
+        
+        # 【关键】记录上次发布的好数据，用于 tf 树断裂保护
+        self.last_good_x = 0.0
+        self.last_good_y = 0.0
+        self.last_good_yaw = 0.0
 
         # ROS 发布与订阅
         self.tf_broadcaster = tf2_ros.TransformBroadcaster()
@@ -119,7 +124,14 @@ class TriSteerOdomNode:
         
         if not data_valid:
             rospy.logwarn_throttle(3.0, f"[tri_steer_odom] 数据异常，已忽略: {'; '.join(warning_msgs)}")
-            return
+            # 【关键】即使数据异常，也要保持 tf 树的连通性
+            # 这样做的目的是防止 RViz 和其他模块的 tf 树断裂
+            # 使用最后已知的位置继续发布（零速度模式）
+            vx = 0.0
+            vy = 0.0
+            wz = 0.0
+            # 继续执行后面的 tf 和 odometry 发布代码，而不是返回
+            # return  # 删除这一行，改为使用零速度继续
 
         # ===================== 【核心数学：构造矩阵 + 最小二乘求解】 =====================
         A = []
@@ -200,29 +212,41 @@ class TriSteerOdomNode:
         self.x += (vx * math.cos(self.yaw) - vy * math.sin(self.yaw)) * dt
         self.y += (vx * math.sin(self.yaw) + vy * math.cos(self.yaw)) * dt
 
-        # 1. 发布 TF 树 (odom -> base_footprint)
+        # 【关键】如果当前数据有效且速度不是零，保存为"上次好数据"
+        # 这样即使下次数据异常，也能使用这个位置继续发布，不会 tf 树断裂
+        if data_valid and (abs(vx) > 0.001 or abs(vy) > 0.001 or abs(wz) > 0.001):
+            self.last_good_x = self.x
+            self.last_good_y = self.y
+            self.last_good_yaw = self.yaw
+        
+        # 使用"好数据"发布，防止 tf 树断裂
+        publish_x = self.x if data_valid else self.last_good_x
+        publish_y = self.y if data_valid else self.last_good_y
+        publish_yaw = self.yaw if data_valid else self.last_good_yaw
+
+        # 1. 【必须发布】TF 树 (odom -> base_footprint) - 防止断裂
         t = TransformStamped()
         t.header.stamp = current_time
         t.header.frame_id = "odom"
         t.child_frame_id = "base_footprint"
-        t.transform.translation.x = self.x
-        t.transform.translation.y = self.y
+        t.transform.translation.x = publish_x
+        t.transform.translation.y = publish_y
         t.transform.translation.z = 0.0
-        q = tf_conversions.transformations.quaternion_from_euler(0, 0, self.yaw)
+        q = tf_conversions.transformations.quaternion_from_euler(0, 0, publish_yaw)
         t.transform.rotation = Quaternion(*q)
         self.tf_broadcaster.sendTransform(t)
 
-        # 2. 发布 标准 Odometry 话题
+        # 2. 【必须发布】标准 Odometry 话题
         odom = Odometry()
         odom.header.stamp = current_time
         odom.header.frame_id = "odom"
         odom.child_frame_id = "base_footprint"
-        odom.pose.pose.position.x = self.x
-        odom.pose.pose.position.y = self.y
+        odom.pose.pose.position.x = publish_x
+        odom.pose.pose.position.y = publish_y
         odom.pose.pose.orientation = Quaternion(*q)
-        odom.twist.twist.linear.x = vx
-        odom.twist.twist.linear.y = vy
-        odom.twist.twist.angular.z = wz
+        odom.twist.twist.linear.x = vx if data_valid else 0.0
+        odom.twist.twist.linear.y = vy if data_valid else 0.0
+        odom.twist.twist.angular.z = wz if data_valid else 0.0
         self.odom_pub.publish(odom)
 
 if __name__ == "__main__":
